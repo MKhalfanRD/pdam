@@ -19,6 +19,7 @@ class Pembayaran extends Model
         'buktiBayar',
         'waktuBayar',
         'tunggakan',
+        'status',
     ];
 
     public function warga()

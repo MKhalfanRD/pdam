@@ -3,8 +3,8 @@
 @section('content')
 <div>
     <!-- Search Filter -->
-    <form action="{{ route('operator.index') }}" method="GET" class="mb-4 gap-4 flex items-center justify-center">
-        <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari nama atau blok..." class="border rounded px-1 py-1 text-white">
+    <form action="{{ route('operator.index') }}" method="GET" class="mb-4 gap-1 flex items-center justify-center">
+        <input type="search" name="search" value="{{ request('search') }}" placeholder="Cari nama atau blok..." class="border rounded px-1 py-1 text-black">
         <button type="submit" class="bg-indigo-600 text-white px-1 py-1 rounded-lg">Cari</button>
 
         <!-- Tambahkan hidden input untuk menjaga urutan sorting -->
@@ -12,7 +12,7 @@
         <input type="hidden" name="direction" value="{{ $direction }}">
     </form>
 
-    <table class="table">
+    <table class="container flex mx-auto table">
       <!-- head -->
       <thead>
         <tr class="text-gray-100">
@@ -50,22 +50,19 @@
       </thead>
       <tbody>
         @php
-            $counter = 0;
+            $counter = ($warga->currentPage() - 1) * $warga->perPage(); // Sesuaikan nomor halaman
         @endphp
         @foreach ($warga as $w)
             <tr class="text-gray-200">
                 <th>
-                    @php
-                        $counter++
-                    @endphp
-                    {{$counter}}
+                    {{ ++$counter }}
                 </th>
-                <td>{{$w->alamat}}</td>
-                <td>{{$w->nama}}</td>
+                <td>{{ $w->alamat }}</td>
+                <td>{{ $w->nama }}</td>
                 <td>
                     <div class="">
-                        <a href="{{route('operator.edit', $w->warga_id)}}">
-                            <button type="submit" class="bg-indigo-600 text-white px-5 py-2 rounded-lg">Edit</button>
+                        <a href="{{ route('operator.edit', $w->warga_id) }}">
+                            <button type="submit" class="bg-indigo-600 text-white p-2 rounded-lg">Edit</button>
                         </a>
                     </div>
                 </td>
@@ -73,5 +70,10 @@
         @endforeach
       </tbody>
     </table>
+
+    <!-- Pagination Links -->
+    <div class="">
+        {{ $warga->links() }}
+    </div>
 </div>
 @endsection

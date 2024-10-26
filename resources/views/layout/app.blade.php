@@ -63,8 +63,8 @@
                     {{-- warga --}}
                     @elseif($role == 'warga')
                     <li class="font-bold text-sm text-gray-400"><a href="#">Home</a></li>
-                    <li class="font-bold text-sm text-gray-400"><a href="#">About</a></li>
-                    <li class="font-bold text-sm text-gray-400"><a href="#">Business</a></li>
+                    <li class="font-bold text-sm text-gray-400"><a href="#">Riwayat</a></li>
+                    <li class="font-bold text-sm text-gray-400"><a href="#">Profil</a></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
@@ -147,12 +147,12 @@
                 </li>
                 <li>
                     <button class="flex flex-col items-center gap-1">
-                        <span class="font-normal text-base text-white">About</span>
+                        <span class="font-normal text-base text-white">Riwayat</span>
                     </button>
                 </li>
                 <li>
                     <button class="flex flex-col items-center gap-1">
-                        <span class="font-normal text-base text-white">Business</span>
+                        <span class="font-normal text-base text-white">Profil</span>
                     </button>
                 </li>
                 <li>
@@ -170,7 +170,7 @@
     </nav>
 
     <section>
-        <div class="col-span-12">
+        <div class="col-span-12 p-4">
             @yield('content')
         </div>
     </section>

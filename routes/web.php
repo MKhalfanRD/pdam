@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\operator\OperatorController;
+use App\Http\Controllers\pembayaran\PembayaranController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\warga\WargaController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [WargaController::class, 'edit'])->name('warga.edit');
         Route::put('/{id}/edit', [WargaController::class, 'update'])->name('warga.update');
         Route::get('/history', [WargaController::class, 'history'])->name('warga.history');
+    });
+    //pembayaran
+    Route::prefix('pembayaran')->group(function () {
+        Route::get('/', [PembayaranController::class, 'index'])->name('pembayaran.index');
+        Route::get('/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
+        Route::post('/', [PembayaranController::class, 'store'])->name('pembayaran.store');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -7,12 +7,13 @@ use App\Models\Pemakaian_Air;
 use App\Models\Warga;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OperatorController extends Controller
 {
     public function index(Request $request){
 
-        $role = 'operator';
+        $role = Auth::user()->role;
         $sort = $request->get('sort', 'nama'); // default sort by 'nama'
         $direction = $request->get('direction', 'asc'); // default direction 'asc'
         $search = $request->get('search', '');
@@ -27,7 +28,7 @@ class OperatorController extends Controller
         }
 
         // Sorting berdasarkan sort dan direction yang diberikan
-        $warga = $warga->orderBy($sort, $direction)->get();
+        $warga = $warga->orderBy($sort, $direction)->paginate(10);
 
         return view('operator.index', compact( 'role','warga', 'sort', 'direction', 'search'));
     }

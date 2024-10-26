@@ -5,7 +5,7 @@
         @csrf
         @method('PUT')
         <div class="flex items-center justify-center">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full">
                 <h2 class="text-2xl font-bold text-center mb-4">Upload Foto</h2>
 
                 <!-- Input untuk Bulan dan Tahun -->
