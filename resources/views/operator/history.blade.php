@@ -40,7 +40,7 @@
         <p class="text-gray-500">Belum ada riwayat untuk bulan {{ $bulanList[$selectedBulan] }} {{ $selectedTahun }}.</p>
     </div>
 @else
-    <table class="table">
+    <table class="table container mx-auto">
         <!-- head -->
         <thead>
             <tr class="text-gray-100">

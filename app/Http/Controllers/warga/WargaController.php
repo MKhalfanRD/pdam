@@ -8,6 +8,7 @@ use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use App\Models\Warga;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class WargaController extends Controller
 {
@@ -24,6 +25,8 @@ class WargaController extends Controller
     //     return view('warga.index', compact('warga', 'role'));
     // }
 
+// ...
+
     public function index()
     {
         $role = Auth::user()->role;
@@ -35,19 +38,21 @@ class WargaController extends Controller
 
         // Ambil data tagihan bulan ini
         $tagihanBulanIni = Pemakaian_Air::where('warga_id', $wargaId)
-                            ->whereMonth('bulan', now()->month)
-                            ->whereYear('bulan', now()->year)
-                            ->first();
+                                ->whereMonth('bulan', now()->month)
+                                ->whereYear('bulan', now()->year)
+                                ->first();
 
         // Hitung total tunggakan jika ada
-        $tunggakan = Pembayaran::where('warga_id', $wargaId)
-                    ->where('status', 'Belum Dibayar')
-                    ->sum('tunggakan');
-
-
+        $tunggakan = DB::table('pemakaian_air')
+                        ->leftJoin('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
+                        ->where('pemakaian_air.warga_id', $wargaId)
+                        ->where('pemakaian_air.bulan', '<', now()->format('Y-m'))
+                        ->whereNull('pembayaran.status') // Memeriksa status dari tabel pembayaran
+                        ->sum('pemakaian_air.tagihanAir');
 
         return view('warga.index', compact('warga', 'role', 'tagihanBulanIni', 'tunggakan'));
-    }
+}
+
 
     public function history()
     {

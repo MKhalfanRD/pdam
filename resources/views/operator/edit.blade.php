@@ -71,7 +71,10 @@
                     <label class="block text-sm font-medium text-gray-700">Pilih Foto</label>
                     <input id="fotoMeteran" name="fotoMeteran" type="file" accept="image/*"
                         class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md bg-gray-50 focus:outline-none">
-                </div>
+                        @error('fotoMeteran')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                    </div>
 
                 <!-- Tombol Simpan -->
                 <div class="mt-6 flex justify-between">

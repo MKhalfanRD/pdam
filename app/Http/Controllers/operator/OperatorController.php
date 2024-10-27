@@ -92,6 +92,22 @@ class OperatorController extends Controller
             'fotoMeteran' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi file foto
         ]);
 
+        // Menghitung kubikasi
+        $kubikasi = $request->input('pemakaianBaru') - $request->input('pemakaianLama');
+
+        // Hitung tagihan berdasarkan tarif
+        $tagihanAir = 0;
+
+        if ($kubikasi > 0) {
+            if ($kubikasi <= 10) {
+                $tagihanAir = $kubikasi * 1500;
+            } elseif ($kubikasi <= 20) {
+                $tagihanAir = (10 * 1500) + (($kubikasi - 10) * 1750);
+            } else {
+                $tagihanAir = (10 * 1500) + (10 * 1750) + (($kubikasi - 20) * 2000);
+            }
+        }
+
         $fotoPath = $pemakaianAir && $pemakaianAir->foto ? $pemakaianAir->foto : null;
 
         // Proses upload foto jika ada
@@ -104,16 +120,19 @@ class OperatorController extends Controller
         $currentMonthYear = now()->format('Y-m');
 
         // Update data di pemakaian_air
-        Pemakaian_Air::updateOrCreate(
+        $p = Pemakaian_Air::updateOrCreate(
             ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
             [
                 'operator_id' => 1,
                 'bulan' => $currentMonthYear, // Format YYYY-MM
                 'pemakaianLama' => $request->input('pemakaianLama'),
                 'pemakaianBaru' => $request->input('pemakaianBaru'),
+                'kubikasi' => $kubikasi,
+                'tagihanAir' => $tagihanAir,
                 'foto' => $fotoPath,
             ]
         );
+        // dd($p);
 
         return redirect()->route('operator.index')->with('success', 'Data pemakaian berhasil diperbarui.');
     }
