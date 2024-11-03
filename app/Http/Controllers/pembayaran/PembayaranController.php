@@ -40,6 +40,10 @@ class PembayaranController extends Controller
             ->where('warga_id', Auth::id()) // Assuming the `warga_id` is the same as the logged-in user ID
             ->get();
 
+        if ($pemakaianAir->isEmpty()) {
+            session()->flash('warning', 'Tagihan air untuk bulan ini belum dikalkulasi oleh operator.');
+        }
+
         return view('pembayaran.create', compact('role', 'pemakaianAir'));
     }
 

@@ -13,6 +13,8 @@ class Pembayaran extends Model
 
     protected $primaryKey = 'pembayaran_id';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'warga_id',
         'pemakaianAir_id',

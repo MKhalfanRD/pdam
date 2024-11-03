@@ -30,11 +30,8 @@ class WargaController extends Controller
     public function index()
     {
         $role = Auth::user()->role;
-        $wargaId = Auth::user()->warga->warga_id;
-
-        $user = Auth::user();
-        // Ambil data nama warga melalui relasi
-        $warga = $user->warga;
+        $warga = Auth::user()->warga;
+        $wargaId = $warga->warga_id;
 
         // Ambil data tagihan bulan ini
         $tagihanBulanIni = Pemakaian_Air::where('warga_id', $wargaId)
@@ -50,8 +47,9 @@ class WargaController extends Controller
                         ->whereNull('pembayaran.status') // Memeriksa status dari tabel pembayaran
                         ->sum('pemakaian_air.tagihanAir');
 
-        return view('warga.index', compact('warga', 'role', 'tagihanBulanIni', 'tunggakan'));
-}
+        return view('warga.index', compact('role', 'warga', 'tagihanBulanIni', 'tunggakan'));
+    }
+
 
 
     public function history()
