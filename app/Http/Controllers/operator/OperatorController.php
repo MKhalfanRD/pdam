@@ -117,14 +117,14 @@ class OperatorController extends Controller
             $fotoPath = $file->store('fotoMeteran', 'public'); // Simpan di storage
         }
 
-        $currentMonthYear = now()->format('Y-m');
+        $currentMonthYear = now()->format('Y-m-d');
 
         // Update data di pemakaian_air
         $p = Pemakaian_Air::updateOrCreate(
             ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
             [
                 'operator_id' => 1,
-                'bulan' => $currentMonthYear, // Format YYYY-MM
+                'bulan' => $currentMonthYear, // Format YYYY-MM-DD
                 'pemakaianLama' => $request->input('pemakaianLama'),
                 'pemakaianBaru' => $request->input('pemakaianBaru'),
                 'kubikasi' => $kubikasi,

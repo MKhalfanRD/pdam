@@ -35,16 +35,20 @@ class PembayaranController extends Controller
         $role = Auth::user()->role;
 
         // Ambil tagihan bulan ini untuk ditampilkan di view
-        $currentMonthYear = now()->format('Y-m'); // Format YYYY-MM
+        $currentMonthYear = now()->format('Y-m-d'); // Format YYYY-MM
         $pemakaianAir = Pemakaian_Air::where('bulan', $currentMonthYear)
             ->where('warga_id', Auth::id()) // Assuming the `warga_id` is the same as the logged-in user ID
-            ->get();
+            ->first();
 
-        if ($pemakaianAir->isEmpty()) {
-            session()->flash('warning', 'Tagihan air untuk bulan ini belum dikalkulasi oleh operator.');
+        $pembayaran = null;
+
+        // Check if a payment record already exists for the current month
+        if ($pemakaianAir) {
+            $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
         }
+        // dd($pembayaran);
 
-        return view('pembayaran.create', compact('role', 'pemakaianAir'));
+        return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
     }
 
     // Simpan bukti pembayaran
@@ -59,15 +63,16 @@ class PembayaranController extends Controller
         // Upload bukti pembayaran
         $buktiBayarPath = $request->file('buktiBayar')->store('bukti_pembayaran', 'public');
 
-        Pembayaran::create([
+        $p = Pembayaran::create([
             'warga_id' => Auth::user()->warga->warga_id,
             'pemakaianAir_id' => $request->pemakaianAir_id,
             'buktiBayar' => $buktiBayarPath,
             'waktuBayar' => now(),
-            'tunggakan' => $request->input('tunggakan', 0), // Sesuaikan nilai tunggakan
+            // 'tunggakan' => $request->input('tunggakan', 0), // Sesuaikan nilai tunggakan
             'komentar' => $request->komentar,
         ]);
+        // dd($p);
 
-        return redirect()->route('pembayaran.create')->with('success', 'Bukti pembayaran berhasil diupload.');
+        return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diupload.');
     }
 }

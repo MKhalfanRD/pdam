@@ -20,8 +20,9 @@ class Pembayaran extends Model
         'pemakaianAir_id',
         'buktiBayar',
         'waktuBayar',
-        'tunggakan',
+        // 'tunggakan',
         'status',
+        'komentar'
     ];
 
     public function warga()

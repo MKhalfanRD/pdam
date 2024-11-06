@@ -35,9 +35,13 @@ class WargaController extends Controller
 
         // Ambil data tagihan bulan ini
         $tagihanBulanIni = Pemakaian_Air::where('warga_id', $wargaId)
-                                ->whereMonth('bulan', now()->month)
-                                ->whereYear('bulan', now()->year)
+                                // ->whereMonth('bulan', now()->month)
+                                // ->whereYear('bulan', now()->year)
                                 ->first();
+
+        $pembayaran = Pembayaran::where('warga_id', $wargaId)
+                      ->where('pemakaianAir_id', $tagihanBulanIni->pemakaianAir_id ?? null)
+                      ->first();
 
         // Hitung total tunggakan jika ada
         $tunggakan = DB::table('pemakaian_air')
@@ -47,7 +51,8 @@ class WargaController extends Controller
                         ->whereNull('pembayaran.status') // Memeriksa status dari tabel pembayaran
                         ->sum('pemakaian_air.tagihanAir');
 
-        return view('warga.index', compact('role', 'warga', 'tagihanBulanIni', 'tunggakan'));
+                        // dd($tagihanBulanIni);
+        return view('warga.index', compact('role', 'warga', 'tagihanBulanIni', 'tunggakan', 'pembayaran'));
     }
 
 
