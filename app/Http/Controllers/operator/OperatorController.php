@@ -4,34 +4,41 @@ namespace App\Http\Controllers\operator;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pemakaian_Air;
+use App\Models\User;
 use App\Models\Warga;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class OperatorController extends Controller
 {
-    public function index(Request $request){
-
+    public function index(Request $request)
+    {
         $role = Auth::user()->role;
         $sort = $request->get('sort', 'nama'); // default sort by 'nama'
         $direction = $request->get('direction', 'asc'); // default direction 'asc'
         $search = $request->get('search', '');
 
-        // Query untuk pencarian dan sorting
-        $warga = Warga::query();
+        // Query untuk pencarian, sorting, dan filter berdasarkan role warga
+        $warga = Warga::whereHas('users', function ($query) {
+            $query->where('role', 'warga'); // Filter hanya pengguna dengan role 'warga'
+        });
 
         // Jika ada pencarian, lakukan filter berdasarkan nama atau alamat
         if (!empty($search)) {
-            $warga = $warga->where('nama', 'like', '%' . $search . '%')
-                           ->orWhere('alamat', 'like', '%' . $search . '%');
+            $warga = $warga->where(function ($query) use ($search) {
+                $query->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('alamat', 'like', '%' . $search . '%');
+            });
         }
 
         // Sorting berdasarkan sort dan direction yang diberikan
         $warga = $warga->orderBy($sort, $direction)->paginate(10);
 
-        return view('operator.index', compact( 'role','warga', 'sort', 'direction', 'search'));
+        return view('operator.index', compact('role', 'warga', 'sort', 'direction', 'search'));
     }
+
 
     // public function search(Request $request){
     //     $search = $request->search;
@@ -51,9 +58,45 @@ class OperatorController extends Controller
     //     return view('operator.index', compact('search', 'warga'));
     // }
 
+    public function create()
+    {
+        $role = Auth::user()->role;
+        return view('operator.create', compact('role'));
+    }
+
+    public function store(Request $request)
+    {
+        $role = Auth::user()->role;
+        // Validasi data
+        $request->validate([
+            'nama' => 'required|string|max:255|unique:users,username',
+            'email' => 'required|email|unique:users,email',
+            'alamat' => 'required|string|max:200',
+            'telp' => 'required|numeric',
+            'password' => 'required|string|min:8',
+        ]);
+
+        // menyimpan ke tabel 'users'
+        $user = User::create([
+            'username' => $request->nama,
+            'email' => $request->email,
+            'role' => 'warga', // Menetapkan role warga secara otomatis
+            'password' => Hash::make($request->password),
+        ]);
+        // menyimpan ke tabel 'warga'
+        $warga = Warga::create([
+            'user_id' => $user->user_id, //menghubungkan warga ke user yang baru dibuat
+            'nama' => $request->nama,
+            'alamat' => $request->alamat,
+            'telp' => $request->telp,
+        ]);
+        // dd($warga);
+
+        return redirect()->route('operator.create')->with('success', 'Warga berhasil didaftarkan!');
+    }
 
     public function edit($warga_id){
-        $role = 'operator';
+        $role = Auth::user()->role;
         $warga = Warga::findOrFail($warga_id);
 
         $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)->first();
@@ -62,22 +105,6 @@ class OperatorController extends Controller
             $pemakaianAir = new Pemakaian_Air(); // atau bisa juga set nilai default lainnya
         }
 
-        // $bulan = [
-        //     '01' => 'January',
-        //     '02' => 'February',
-        //     '03' => 'March',
-        //     '04' => 'April',
-        //     '05' => 'May',
-        //     '06' => 'June',
-        //     '07' => 'July',
-        //     '08' => 'August',
-        //     '09' => 'September',
-        //     '10' => 'October',
-        //     '11' => 'November',
-        //     '12' => 'December',
-        // ];
-
-        // $tahun = range(date('Y'), date('Y') - 5); // Tahun 5 tahun terakhir
 
         return view('operator.edit', compact(['warga', 'pemakaianAir', 'role']));
     }
@@ -95,35 +122,30 @@ class OperatorController extends Controller
         // Menghitung kubikasi
         $kubikasi = $request->input('pemakaianBaru') - $request->input('pemakaianLama');
 
-        // Hitung tagihan berdasarkan tarif
-        $tagihanAir = 0;
+        // Perhitungan sesuai formula yang diberikan
+        $sepuluhPertama = ($kubikasi < 10) ? $kubikasi : 10;
+        $sepuluhKedua = ($kubikasi > 20) ? 10 : (($kubikasi > 10) ? $kubikasi - 10 : 0);
+        $sisa = ($kubikasi > 20) ? $kubikasi - 20 : 0;
 
-        if ($kubikasi > 0) {
-            if ($kubikasi <= 10) {
-                $tagihanAir = $kubikasi * 1500;
-            } elseif ($kubikasi <= 20) {
-                $tagihanAir = (10 * 1500) + (($kubikasi - 10) * 1750);
-            } else {
-                $tagihanAir = (10 * 1500) + (10 * 1750) + (($kubikasi - 20) * 2000);
-            }
-        }
+        // Menghitung tagihan berdasarkan tarif
+        $tagihanAir = ($sepuluhPertama * 1500) + ($sepuluhKedua * 1750) + ($sisa * 2000) + 25000;
 
+        // Menyimpan path foto jika sudah ada atau proses upload foto jika ada
         $fotoPath = $pemakaianAir && $pemakaianAir->foto ? $pemakaianAir->foto : null;
-
-        // Proses upload foto jika ada
-        // $fotoPath = $pemakaianAir->foto;
         if ($request->hasFile('fotoMeteran')) {
             $file = $request->file('fotoMeteran');
             $fotoPath = $file->store('fotoMeteran', 'public'); // Simpan di storage
         }
 
+        $operator_id = Auth::user()->id;;
+
         $currentMonthYear = now()->format('Y-m-d');
 
         // Update data di pemakaian_air
-        $p = Pemakaian_Air::updateOrCreate(
+        Pemakaian_Air::updateOrCreate(
             ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
             [
-                'operator_id' => 1,
+                'operator_id' => $operator_id,
                 'bulan' => $currentMonthYear, // Format YYYY-MM-DD
                 'pemakaianLama' => $request->input('pemakaianLama'),
                 'pemakaianBaru' => $request->input('pemakaianBaru'),
@@ -132,13 +154,14 @@ class OperatorController extends Controller
                 'foto' => $fotoPath,
             ]
         );
-        // dd($p);
 
         return redirect()->route('operator.index')->with('success', 'Data pemakaian berhasil diperbarui.');
     }
 
+
     public function history(Request $request) {
         $role = 'operator';
+
         // Ambil bulan dan tahun dari request, jika tidak ada gunakan bulan dan tahun sekarang
         $selectedBulan = $request->get('bulan', date('m'));
         $selectedTahun = $request->get('tahun', date('Y'));
@@ -150,22 +173,21 @@ class OperatorController extends Controller
         // Ambil keyword pencarian
         $search = $request->get('search', '');
 
-        // Format bulan dan tahun untuk query
-        $bulanTahun = $selectedTahun . '-' . str_pad($selectedBulan, 2, '0', STR_PAD_LEFT);
-
         // Query pemakaian berdasarkan bulan dan tahun
-        $pemakaianAir = Pemakaian_Air::where('bulan', $bulanTahun)->with(['warga' => function($query) use ($sort, $direction) {
-            // Sorting berdasarkan kolom di tabel warga (relasi)
-            if ($sort == 'nama' || $sort == 'alamat') {
-                $query->orderBy($sort, $direction);
-            }
-        }]);
+        $pemakaianAir = Pemakaian_Air::whereYear('bulan', $selectedTahun)
+            ->whereMonth('bulan', $selectedBulan)
+            ->with(['warga' => function($query) use ($sort, $direction) {
+                // Sorting berdasarkan kolom di tabel warga (relasi)
+                if ($sort == 'nama' || $sort == 'alamat') {
+                    $query->orderBy($sort, $direction);
+                }
+            }]);
 
         // Pencarian
         if (!empty($search)) {
             $pemakaianAir->whereHas('warga', function($query) use ($search) {
                 $query->where('nama', 'like', '%' . $search . '%')
-                      ->orWhere('alamat', 'like', '%' . $search . '%'); // Gunakan orWhere
+                    ->orWhere('alamat', 'like', '%' . $search . '%'); // Gunakan orWhere
             });
         }
 
@@ -196,4 +218,5 @@ class OperatorController extends Controller
 
         return view('operator.history', compact('role', 'pemakaianAir', 'selectedBulan', 'selectedTahun', 'bulanList', 'tahunList', 'sort', 'direction', 'search'));
     }
+
 }

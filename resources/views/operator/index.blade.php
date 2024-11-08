@@ -1,6 +1,7 @@
 @extends('layout.app')
 
 @section('content')
+
 <div>
     <!-- Search Filter -->
     <form action="{{ route('operator.index') }}" method="GET" class="mb-4 gap-1 flex items-center justify-center">
@@ -12,7 +13,20 @@
         <input type="hidden" name="direction" value="{{ $direction }}">
     </form>
 
-    <table class="container flex mx-auto table">
+    <!-- Tombol Tambah -->
+    <div class="mb-4 flex justify-center">
+        <a href="{{ route('operator.create') }}">
+            <button class="bg-green-600 text-white px-2 py-1 rounded-lg">Tambah</button>
+        </a>
+    </div>
+
+    <!-- Cek apakah ada data warga -->
+    @if ($warga->isEmpty())
+        <div class="text-center text-gray-500">
+            <p>Belum ada warga.</p>
+        </div>
+    @else
+    <table class="container mx-auto table">
       <!-- head -->
       <thead>
         <tr class="text-gray-100">
@@ -75,5 +89,6 @@
     <div class="">
         {{ $warga->links() }}
     </div>
+    @endif
 </div>
 @endsection

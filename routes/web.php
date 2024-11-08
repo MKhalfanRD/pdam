@@ -18,6 +18,8 @@ Route::middleware('auth')->group(function () {
     //operator
     Route::prefix('operator')->group(function () {
         Route::get('/', [OperatorController::class, 'index'])->name('operator.index');
+        Route::get('/create', [OperatorController::class, 'create'])->name('operator.create');
+        Route::post('/store', [OperatorController::class, 'store'])->name('operator.store');
         Route::get('/{id}/edit', [OperatorController::class, 'edit'])->name('operator.edit');
         Route::put('/{id}/edit', [OperatorController::class, 'update'])->name('operator.update');
         Route::get('/history', [OperatorController::class, 'history'])->name('operator.history');

@@ -29,27 +29,63 @@ class PembayaranController extends Controller
 
         return view('pembayaran.index', compact('role', 'pembayaranList'));
     }
-    public function create()
+    // public function create()
+    // {
+    //     $user = Auth::user();
+    //     $role = $user->role;
+
+    //     // Ambil bulan dan tahun saat ini
+    //     $currentYear = now()->year;
+    //     $currentMonth = now()->month;
+
+    //     // Ambil tagihan bulan ini untuk ditampilkan di view
+    //     $pemakaianAir = Pemakaian_Air::whereYear('bulan', $currentYear)
+    //         ->whereMonth('bulan', $currentMonth)
+    //         ->where('warga_id', $user->id)
+    //         ->first();
+
+    //     // Debug untuk melihat apakah tagihan sudah ada
+    //     dd($pemakaianAir, optional($pemakaianAir)->tagihanAir);
+
+    //     $pembayaran = null;
+
+    //     if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
+    //         $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
+    //     } else {
+    //         $pemakaianAir = null;
+    //     }
+
+    //     return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
+    // }
+
+    public function create(Request $request)
     {
         $user = Auth::user();
-        $role = Auth::user()->role;
+        $role = $user->role;
+        $warga = $user->warga;
+        $wargaId = $warga->warga_id;
 
-        // Ambil tagihan bulan ini untuk ditampilkan di view
-        $currentMonthYear = now()->format('Y-m-d'); // Format YYYY-MM
-        $pemakaianAir = Pemakaian_Air::where('bulan', $currentMonthYear)
-            ->where('warga_id', Auth::id()) // Assuming the `warga_id` is the same as the logged-in user ID
-            ->first();
+        // Ambil tagihan bulan ini
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $wargaId)
+                            ->whereMonth('bulan', now()->month)
+                            ->whereYear('bulan', now()->year)
+                            ->first();
+
+        // Debug untuk melihat apakah tagihan dan pembayaran sudah ada
+        // dd($pemakaianAir, optional($pemakaianAir)->tagihanAir);
 
         $pembayaran = null;
 
-        // Check if a payment record already exists for the current month
-        if ($pemakaianAir) {
+        if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
+        } else {
+            $pemakaianAir = null;
         }
-        // dd($pembayaran);
 
         return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
     }
+
+
 
     // Simpan bukti pembayaran
     public function store(Request $request)
