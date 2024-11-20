@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [WargaController::class, 'edit'])->name('warga.edit');
         Route::put('/{id}/edit', [WargaController::class, 'update'])->name('warga.update');
         Route::get('/history', [WargaController::class, 'history'])->name('warga.history');
+        Route::get('/detailHistory', [WargaController::class, 'detailHistory'])->name('warga.detailHistory');
     });
     //pembayaran
     Route::prefix('pembayaran')->group(function () {

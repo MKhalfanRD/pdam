@@ -92,7 +92,7 @@ class OperatorController extends Controller
         ]);
         // dd($warga);
 
-        return redirect()->route('operator.create')->with('success', 'Warga berhasil didaftarkan!');
+        return redirect()->route('operator.index')->with('success', 'Warga berhasil didaftarkan!');
     }
 
     public function edit($warga_id){

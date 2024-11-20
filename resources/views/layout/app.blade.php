@@ -62,8 +62,8 @@
                     </li>
                     {{-- warga --}}
                     @elseif($role == 'warga')
-                    <li class="font-bold text-sm text-gray-400"><a href="#">Home</a></li>
-                    <li class="font-bold text-sm text-gray-400"><a href="#">Riwayat</a></li>
+                    <li class="font-bold text-sm text-gray-400"><a href="{{route('warga.index')}}">Home</a></li>
+                    <li class="font-bold text-sm text-gray-400"><a href="{{route('warga.history')}}">Riwayat</a></li>
                     <li class="font-bold text-sm text-gray-400"><a href="#">Profil</a></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
@@ -142,12 +142,16 @@
                 @elseif(Auth::user()->role == 'warga')
                 <li>
                     <button class="flex flex-col items-center gap-1">
-                        <span class="font-normal text-base text-white">Home</span>
+                        <a href="{{route('warga.index')}}">
+                            <span class="font-normal text-base text-white">Home</span>
+                        </a>
                     </button>
                 </li>
                 <li>
                     <button class="flex flex-col items-center gap-1">
-                        <span class="font-normal text-base text-white">Riwayat</span>
+                        <a href="{{route('warga.history')}}">
+                            <span class="font-normal text-base text-white">Riwayat</span>
+                        </a>
                     </button>
                 </li>
                 <li>

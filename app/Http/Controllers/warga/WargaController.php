@@ -59,14 +59,45 @@ class WargaController extends Controller
 
     public function history()
     {
-        $wargaId = Auth::user()->warga->warga_id;
-        // Ambil histori pembayaran
+        $role = Auth::user()->role; // Simpan role untuk penggunaan di view
+        $wargaId = Auth::user()->warga->warga_id; // Ambil ID warga dari user yang login
+
+        // Ambil histori pembayaran untuk warga terkait, diurutkan berdasarkan waktu bayar terbaru
         $historiPembayaran = Pembayaran::where('warga_id', $wargaId)
-                            ->with('pemakaianAir')
+                            ->with('pemakaianAir') // Load relasi jika diperlukan
                             ->orderBy('waktuBayar', 'desc')
-                            ->get();
+                            ->paginate(10); // Tambahkan paginasi untuk mengontrol jumlah data per halaman
 
-        return view('warga.history', compact( 'historiPembayaran'));
+        // dd($role);
 
+        return view('warga.history', compact('historiPembayaran', 'role'));
+    }
+
+
+    public function detailHistory()
+    {
+        $user = Auth::user();
+        $role = $user->role;
+        $warga = $user->warga;
+        $wargaId = $warga->warga_id;
+
+        // Ambil tagihan bulan ini
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $wargaId)
+                            ->whereMonth('bulan', now()->month)
+                            ->whereYear('bulan', now()->year)
+                            ->first();
+
+        // Debug untuk melihat apakah tagihan dan pembayaran sudah ada
+        // dd($pemakaianAir, optional($pemakaianAir)->tagihanAir);
+
+        $pembayaran = null;
+
+        if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
+            $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
+        } else {
+            $pemakaianAir = null;
+        }
+
+        return view('warga.detailHistory', compact('role', 'pemakaianAir', 'pembayaran'));
     }
 }

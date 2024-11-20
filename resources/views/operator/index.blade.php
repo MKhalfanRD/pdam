@@ -1,6 +1,16 @@
 @extends('layout.app')
 
 @section('content')
+<!-- Notifikasi Berhasil -->
+@if (session('success'))
+<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+    {{-- <strong class="font-bold">Berhasil!</strong> --}}
+    <span class="block sm:inline">{{ session('success') }}</span>
+    <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.style.display='none';">
+        <span class="text-green-500">&times;</span>
+    </button>
+</div>
+@endif
 
 <div>
     <!-- Search Filter -->
@@ -26,7 +36,7 @@
             <p>Belum ada warga.</p>
         </div>
     @else
-    <table class="container mx-auto table">
+    <table class="container mx-auto table w-full max-w-4xl">
       <!-- head -->
       <thead>
         <tr class="text-gray-100">
