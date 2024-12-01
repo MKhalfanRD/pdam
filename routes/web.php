@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\operator\OperatorController;
 use App\Http\Controllers\pembayaran\PembayaranController;
 use App\Http\Controllers\ProfileController;
@@ -15,6 +16,11 @@ Route::get('/', function () {
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    //admin
+    Route::prefix('admin')->group(function(){
+        Route::get('/', [AdminController::class, 'index'])->name('admin.index');
+        Route::get('/{id}/show', [AdminController::class, 'show'])->name('admin.show');
+    });
     //operator
     Route::prefix('operator')->group(function () {
         Route::get('/', [OperatorController::class, 'index'])->name('operator.index');

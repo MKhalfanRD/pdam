@@ -34,8 +34,8 @@
                 <div class="mb-4">
                     <label for="pemakaianLama" class="block text-sm font-medium text-gray-700 mb-2">Pemakaian Lama</label>
                     <input type="number" name="pemakaianLama" id="pemakaianLama"
-                        value="{{ $pemakaianAir->pemakaianLama ?? '' }}"
-                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2">
+                        value="{{ old('pemakaianLama', $pemakaianAir->pemakaianLama ?? '') }}"
+                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0" placeholder="ex: 1650">
                     @error('pemakaianLama')
                         <span class="text-red-500">{{ $message }}</span>
                     @enderror
@@ -45,8 +45,8 @@
                 <div class="mb-4">
                     <label for="pemakaianBaru" class="block text-sm font-medium text-gray-700 mb-2">Pemakaian Baru</label>
                     <input type="number" name="pemakaianBaru" id="pemakaianBaru"
-                        value="{{ $pemakaianAir->pemakaianBaru ?? '' }}"
-                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2">
+                        value="{{ old('pemakaianBaru', $pemakaianAir->pemakaianBaru ?? '') }}"
+                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0" placeholder="ex: 1650">
                     @error('pemakaianBaru')
                         <span class="text-red-500">{{ $message }}</span>
                     @enderror

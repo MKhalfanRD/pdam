@@ -21,7 +21,7 @@ class OperatorController extends Controller
         $search = $request->get('search', '');
 
         // Query untuk pencarian, sorting, dan filter berdasarkan role warga
-        $warga = Warga::whereHas('users', function ($query) {
+        $warga = Warga::whereHas('user', function ($query) {
             $query->where('role', 'warga'); // Filter hanya pengguna dengan role 'warga'
         });
 
