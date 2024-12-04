@@ -22,6 +22,10 @@
             </select>
 
             <button type="submit" class="ml-4 px-4 py-2 bg-blue-500 text-white rounded">Filter</button>
+
+            <a href="{{ route('admin.summary', ['bulan' => request('bulan'), 'tahun' => request('tahun')]) }}"
+                class="ml-4 px-4 py-2 bg-green-500 text-white rounded">Summary
+            </a>
         </form>
 
         <table class="table-auto w-full">
@@ -36,6 +40,20 @@
                     <th class="py-2 px-4">Total Tagihan</th>
                     <th class="py-2 px-4">Flag</th>
                     <th class="py-2 px-4">Detail</th>
+                    <th class="py-2 px-4">
+                        <a href="{{ route('admin.index', ['sort' => 'status', 'direction' => $direction == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center">
+                            Status
+                            <span class="ml-1">
+                                @if ($sort === 'status')
+                                    @if ($direction == 'asc')
+                                        ↑
+                                    @else
+                                        ↓
+                                    @endif
+                                @endif
+                            </span>
+                        </a>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -49,43 +67,64 @@
                         <td class="py-2 px-4">{{ $d->pemakaianBaru }}</td>
                         <td class="py-2 px-4">{{ $d->tagihanAir }}</td>
                         <td class="py-2 px-4">
-                            <button class="flag-toggle">
-                                <img src="{{ asset('icon/red_flag.png') }}" alt="toggle" class="w-5">
-                            </button>
+                            <div class="">
+                                <img src="{{ asset('icon/red_flag.png') }}" alt="toggle" class="flag-toggle w-5">
+
+                            </div>
+
                         </td>
                         <td class="py-2 px-4">
                             <a href="{{ route('admin.show', $d->warga_id) }}">
-                                <img src="{{ asset('icon/detail.png') }}" alt="detail" class="w-5">
+                                <img src="{{ asset('icon/detail.png') }}" alt="detail" class="flag-toggle w-5">
                             </a>
+                        </td>
+                        <td class="py-2 px-4">
+                            @if ($d->pembayaran->count() > 0)
+                                @php $status = $d->pembayaran->first()->status; @endphp
+                                <span
+                                    class="
+                                            @if ($status === 'Belum Bayar') text-red-500
+                                            @elseif($status === 'pending') text-yellow-500
+                                            @elseif($status === 'Terverifikasi') text-green-500 @endif
+                                        ">
+                                    {{ $status }}
+                                </span>
+                            @else
+                                <span class="text-red-500">belum bayar</span>
+                            @endif
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-gray-400">Data tidak tersedia untuk bulan dan tahun yang dipilih.</td>
+                        <td colspan="9" class="text-center py-4 text-gray-400">Data tidak tersedia untuk bulan dan tahun
+                            yang dipilih.</td>
                     </tr>
                 @endforelse
             </tbody>
+            {{-- <div class="pagination">
+                {{ $data->appends(['sort' => $sort, 'direction' => $direction, 'search' => $search])->links() }}
+            </div> --}}
         </table>
     </div>
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const flagImages = document.querySelectorAll('.flag-toggle img');
-        flagImages.forEach(function (flagImage) {
-            flagImage.addEventListener('click', function () {
-                const currentSrc = flagImage.src;
-                const redFlag = "{!! asset('icon/red_flag.png') !!}";
-                const greenFlag = "{!! asset('icon/green_flag.png') !!}";
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const flagImages = document.querySelectorAll('.flag-toggle img');
+            flagImages.forEach(function(flagImage) {
+                flagImage.addEventListener('click', function() {
+                    const currentSrc = flagImage.src;
+                    const redFlag = "{!! asset('icon/red_flag.png') !!}";
+                    const greenFlag = "{!! asset('icon/green_flag.png') !!}";
 
-                if (currentSrc.includes('red_flag.png')) {
-                    flagImage.src = greenFlag;
-                } else {
-                    flagImage.src = redFlag;
-                }
+                    if (currentSrc.includes('red_flag.png')) {
+                        flagImage.src = greenFlag;
+                    } else {
+                        flagImage.src = redFlag;
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 @endsection

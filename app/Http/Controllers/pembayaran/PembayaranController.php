@@ -7,6 +7,8 @@ use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Container\Attributes\Storage;
+use Illuminate\Support\Facades\Storage as FacadesStorage;
 
 class PembayaranController extends Controller
 {
@@ -76,10 +78,16 @@ class PembayaranController extends Controller
 
         $pembayaran = null;
 
+        // Jika ada tagihan, periksa status pembayaran
         if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
+
+            // Jangan tampilkan formulir jika pembayaran sudah ada dan berstatus 'sudah bayar'
+            if ($pembayaran && $pembayaran->status === 'sudah bayar') {
+                $pemakaianAir->editable = true;
+            }
         } else {
-            $pemakaianAir = null;
+            $pemakaianAir = null; // Tidak ada tagihan untuk bulan ini
         }
 
         return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
@@ -111,4 +119,68 @@ class PembayaranController extends Controller
 
         return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diupload.');
     }
+
+    public function edit(Pembayaran $pembayaran)
+    {
+        $user = Auth::user();
+        $role = $user->role;
+        $warga = $user->warga;
+        $wargaId = $warga->warga_id;
+
+        // Ambil tagihan bulan ini
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $wargaId)
+                            ->whereMonth('bulan', now()->month)
+                            ->whereYear('bulan', now()->year)
+                            ->first();
+
+        // Debug untuk melihat apakah tagihan dan pembayaran sudah ada
+        // dd($pemakaianAir, optional($pemakaianAir)->tagihanAir);
+
+        // Jika ada tagihan, periksa status pembayaran
+        if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
+            $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
+
+            // Jangan tampilkan formulir jika pembayaran sudah ada dan berstatus 'sudah bayar'
+            if ($pembayaran && $pembayaran->status === 'sudah bayar') {
+                $pemakaianAir->editable = true;
+            }
+        } else {
+            $pemakaianAir = null; // Tidak ada tagihan untuk bulan ini
+        }
+
+        // dd($pemakaianAir);
+
+        return view('pembayaran.edit', compact('pembayaran', 'role', 'pemakaianAir'));
+    }
+
+    public function update(Request $request, Pembayaran $pembayaran)
+    {
+        // dd($request->all());
+
+        $validatedData = $request->validate([
+            'buktiBayar' => 'nullable|image', // Membolehkan 'nullable' jika tidak ada perubahan gambar
+            'komentar' => 'nullable|string|max:255',
+        ]);
+
+        // Simpan file baru jika ada
+        if ($request->hasFile('buktiBayar')) {
+            // Jika ada file baru, simpan dan ganti nilai buktiBayar
+            $validatedData['buktiBayar'] = $request->file('buktiBayar')->store('bukti-bayar', 'public');
+        } else {
+            // Jika tidak ada file baru, pertahankan file yang lama
+            $validatedData['buktiBayar'] = $pembayaran->buktiBayar;
+        }
+
+        // Pertahankan komentar lama jika tidak ada perubahan
+        $validatedData['komentar'] = $request->komentar ?? $pembayaran->komentar;
+
+        // Perbarui data pembayaran
+        $pembayaran->update($validatedData);
+        dd($pembayaran);
+
+        return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diperbarui.');
+    }
+
+
+
 }

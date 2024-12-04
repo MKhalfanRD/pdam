@@ -34,4 +34,5 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(Pemakaian_Air::class, 'pemakaianAir_id', 'pemakaianAir_id');
     }
+    
 }

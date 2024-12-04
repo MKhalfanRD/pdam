@@ -34,4 +34,9 @@ class Pemakaian_Air extends Model
     {
         return $this->belongsTo(User::class, 'operator_id', 'user_id');
     }
+
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class, 'pemakaianAir_id', 'pemakaianAir_id');
+    }
 }

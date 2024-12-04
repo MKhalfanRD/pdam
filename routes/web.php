@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->group(function(){
         Route::get('/', [AdminController::class, 'index'])->name('admin.index');
         Route::get('/{id}/show', [AdminController::class, 'show'])->name('admin.show');
+        Route::get('/summary', [AdminController::class, 'summary'])->name('admin.summary');
     });
     //operator
     Route::prefix('operator')->group(function () {
@@ -43,6 +44,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [PembayaranController::class, 'index'])->name('pembayaran.index');
         Route::get('/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
         Route::post('/', [PembayaranController::class, 'store'])->name('pembayaran.store');
+        Route::get( '/{pembayaran}/edit', [PembayaranController::class, 'edit'])->name('pembayaran.edit');
+        Route::put( '/{pembayaran}/', [PembayaranController::class, 'update'])->name('pembayaran.update');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

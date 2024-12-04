@@ -41,7 +41,7 @@
         <div class="mb-6">
             @if ($pembayaran)
                 <!-- Button to view payment details if already paid -->
-                <a href="{{ route('pembayaran.create', ['pemakaianAir_id' => $tagihanBulanIni->pemakaianAir_id]) }}"
+                <a href="{{ route('pembayaran.edit', $pembayaran) }}"
                     class="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Lihat</a>
             @else
                 <!-- Button to make a payment if not yet paid -->
