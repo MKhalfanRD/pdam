@@ -33,26 +33,50 @@ class WargaController extends Controller
         $warga = Auth::user()->warga;
         $wargaId = $warga->warga_id;
 
-        // Ambil data tagihan bulan ini
-        $tagihanBulanIni = Pemakaian_Air::where('warga_id', $wargaId)
-                                // ->whereMonth('bulan', now()->month)
-                                // ->whereYear('bulan', now()->year)
-                                ->first();
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $wargaId)
+            ->whereMonth('bulan', now()->month)
+            ->whereYear('bulan', now()->year)
+            ->first();
 
-        $pembayaran = Pembayaran::where('warga_id', $wargaId)
-                      ->where('pemakaianAir_id', $tagihanBulanIni->pemakaianAir_id ?? null)
-                      ->first();
+        // $pembayaran = Pembayaran::where('warga_id', $wargaId)
+        //               ->where('pemakaianAir_id', $tagihanBulanIni->pemakaianAir_id ?? null)
+        //               ->first();
 
-        // Hitung total tunggakan jika ada
-        $tunggakan = DB::table('pemakaian_air')
-                        ->leftJoin('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
-                        ->where('pemakaian_air.warga_id', $wargaId)
-                        ->where('pemakaian_air.bulan', '<', now()->format('Y-m'))
-                        ->whereNull('pembayaran.status') // Memeriksa status dari tabel pembayaran
-                        ->sum('pemakaian_air.tagihanAir');
+        $pembayaran = null;
+        $statusPembayaran = 'Belum Bayar';
+        $jumlahTagihan = 0;
+
+        // Cek jika ada tagihan bulan ini
+        if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
+            $jumlahTagihan = $pemakaianAir->tagihanAir;
+
+            // Cari data pembayaran berdasarkan pemakaianAir_id dan warga_id
+            $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)
+            ->where('warga_id', $wargaId) // pastikan warga yang sedang login yang memiliki pembayaran ini
+            ->first();
+
+            // Jika pembayaran sudah ada, ambil status pembayaran dan jumlah tagihan
+            if ($pembayaran) {
+                $statusPembayaran = $pembayaran->status; // "Belum Bayar", "Pending", atau "Terverifikasi"
+
+                // Jika status pembayaran "Sudah Bayar", set jumlah tagihan menjadi 0
+                if ($statusPembayaran === 'Terverifikasi') {
+                    $jumlahTagihan = 0;
+                }
+            }
+        }
+
+        // // Hitung total tunggakan jika ada
+        // $tunggakan = DB::table('pemakaian_air')
+        //                 ->leftJoin('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
+        //                 ->where('pemakaian_air.warga_id', $wargaId)
+        //                 ->where('pemakaian_air.bulan', '<', now()->format('Y-m'))
+        //                 ->whereNull('pembayaran.status') // Memeriksa status dari tabel pembayaran
+        //                 ->sum('pemakaian_air.tagihanAir');
 
                         // dd($tagihanBulanIni);
-        return view('warga.index', compact('role', 'warga', 'tagihanBulanIni', 'tunggakan', 'pembayaran'));
+        // return view('warga.index', compact('role', 'warga', 'tagihanBulanIni', 'tunggakan', 'pembayaran'));
+        return view('warga.index', compact('role', 'warga', 'pemakaianAir', 'pembayaran', 'statusPembayaran', 'jumlahTagihan'));
     }
 
 

@@ -41,7 +41,8 @@
                     <th class="py-2 px-4">Flag</th>
                     <th class="py-2 px-4">Detail</th>
                     <th class="py-2 px-4">
-                        <a href="{{ route('admin.index', ['sort' => 'status', 'direction' => $direction == 'asc' ? 'desc' : 'asc']) }}" class="flex items-center">
+                        <a href="{{ route('admin.index', ['sort' => 'status', 'direction' => $direction == 'asc' ? 'desc' : 'asc']) }}"
+                            class="flex items-center">
                             Status
                             <span class="ml-1">
                                 @if ($sort === 'status')
@@ -95,8 +96,13 @@
                         </td>
                     </tr>
                 @empty
+                    @php
+                        $carbonDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1);
+                        $bulanHuruf = $carbonDate->format('F');
+                    @endphp
                     <tr>
-                        <td colspan="9" class="text-center py-4 text-gray-400">Data tidak tersedia untuk bulan dan tahun
+                        <td colspan="12" class="text-center text-red-300 py-4">Data tidak tersedia untuk bulan
+                            {{ $bulanHuruf }} dan tahun {{ $tahun }}
                             yang dipilih.</td>
                     </tr>
                 @endforelse

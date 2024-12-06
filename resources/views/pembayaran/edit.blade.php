@@ -25,9 +25,9 @@
 
                 <div class="mb-6">
                     <label for="buktiBayar" class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Pembayaran</label>
-                    <input id="buktiBayar" name="buktiBayar" type="file" accept="image/*" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500">
+                    <input id="buktiBayar" name="buktiBayar" type="file" accept="image/*" class="{{ !$pemakaianAir->editable ? 'disabled' : '' }} block w-full text-sm text-gray-900 border border-gray-300 rounded-md bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500">
                     @if ($pembayaran && $pembayaran->buktiBayar)
-                        <img src="{{ asset('storage/' . $pembayaran->buktiBayar) }}" alt="Bukti Pembayaran" class="my-2 max-w-xs">
+                        <img src="{{ asset('storage/' . $pembayaran->buktiBayar) }}" alt="Bukti Pembayaran" class="mx-auto my-2">
                     @endif
                     @error('buktiBayar')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -36,7 +36,7 @@
 
                 <div class="mb-6">
                     <label for="komentar" class="block text-sm font-medium text-gray-700 mb-2">Komentar</label>
-                    <textarea name="komentar" id="komentar" class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 focus:outline-none" rows="3">{{ old('komentar', $pembayaran->komentar ?? '') }}</textarea>
+                    <textarea name="komentar" id="komentar" class="{{ !$pemakaianAir->editable ? 'disabled' : '' }} block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 focus:outline-none" rows="3">{{ old('komentar', $pembayaran->komentar ?? '') }}</textarea>
                     @error('komentar')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -46,7 +46,7 @@
                     <a href="{{ route('warga.index') }}">
                         <button type="button" class="bg-gray-400 px-5 py-2.5 text-white rounded-md hover:bg-gray-500 focus:outline-none">Kembali</button>
                     </a>
-                    <button type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-md hover:bg-indigo-700 focus:outline-none">Upload</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-md hover:bg-indigo-700 focus:outline-none">Edit</button>
                 </div>
             @else
                 <div class="bg-yellow-200 text-yellow-800 p-4 rounded mb-6">

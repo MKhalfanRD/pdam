@@ -97,14 +97,33 @@ class OperatorController extends Controller
 
     public function edit($warga_id){
         $role = Auth::user()->role;
+        // $operator_id = Auth::user()->id;
+        // dd($operator_id, $role);
         $warga = Warga::findOrFail($warga_id);
 
-        $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)->first();
+        // Mendapatkan tanggal saat ini
+        $tanggalHariIni = Carbon::today();
+        $bulanSaatIni = $tanggalHariIni->month;
+        $tahunSaatIni = $tanggalHariIni->year;
 
+        // $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)->first();
+
+         // Cari data pemakaian air berdasarkan warga_id, bulan, dan tahun saat ini
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)
+        ->whereMonth('bulan', $bulanSaatIni)
+        ->whereYear('bulan', $tahunSaatIni)
+        ->first();
+
+        // Jika tidak ada data, buat instance baru dengan default bulan dan tahun saat ini
         if (!$pemakaianAir) {
-            $pemakaianAir = new Pemakaian_Air(); // atau bisa juga set nilai default lainnya
+            $pemakaianAir = new Pemakaian_Air();
+            $pemakaianAir->warga_id = $warga_id;
+            $pemakaianAir->bulan = $bulanSaatIni; // Set bulan saat ini
+            $pemakaianAir->tahun = $tahunSaatIni; // Set tahun saat ini
+            $pemakaianAir->pemakaianLama = 0; // Default nilai
+            $pemakaianAir->pemakaianBaru = 0; // Default nilai
+            $pemakaianAir->tagihanAir = 0; // Default nilai
         }
-
 
         return view('operator.edit', compact(['warga', 'pemakaianAir', 'role']));
     }
@@ -137,16 +156,31 @@ class OperatorController extends Controller
             $fotoPath = $file->store('fotoMeteran', 'public'); // Simpan di storage
         }
 
-        $operator_id = Auth::user()->id;;
+        $operator_id = Auth::user()->id;
 
         $currentMonthYear = now()->format('Y-m-d');
 
         // Update data di pemakaian_air
+        // $d = Pemakaian_Air::updateOrCreate(
+        //     ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
+        //     [
+        //         'operator_id' => $operator_id,
+        //         'bulan' => $currentMonthYear, // Format YYYY-MM-DD
+        //         'pemakaianLama' => $request->input('pemakaianLama'),
+        //         'pemakaianBaru' => $request->input('pemakaianBaru'),
+        //         'kubikasi' => $kubikasi,
+        //         'tagihanAir' => $tagihanAir,
+        //         'foto' => $fotoPath,
+        //     ]
+        // );
+        // Perbarui data atau buat baru jika belum ada
         Pemakaian_Air::updateOrCreate(
-            ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
             [
-                'operator_id' => $operator_id,
-                'bulan' => $currentMonthYear, // Format YYYY-MM-DD
+                'warga_id' => $warga_id,
+                'bulan' => $currentMonthYear, // Pastikan hanya berlaku untuk bulan ini
+            ],
+            [
+                'operator_id' => Auth::id(),
                 'pemakaianLama' => $request->input('pemakaianLama'),
                 'pemakaianBaru' => $request->input('pemakaianBaru'),
                 'kubikasi' => $kubikasi,
@@ -154,6 +188,7 @@ class OperatorController extends Controller
                 'foto' => $fotoPath,
             ]
         );
+        // dd($d);
 
         return redirect()->route('operator.index')->with('success', 'Data pemakaian berhasil diperbarui.');
     }

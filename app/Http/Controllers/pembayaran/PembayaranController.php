@@ -81,13 +81,6 @@ class PembayaranController extends Controller
         // Jika ada tagihan, periksa status pembayaran
         if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
-
-            // Jangan tampilkan formulir jika pembayaran sudah ada dan berstatus 'sudah bayar'
-            if ($pembayaran && $pembayaran->status === 'sudah bayar') {
-                $pemakaianAir->editable = true;
-            }
-        } else {
-            $pemakaianAir = null; // Tidak ada tagihan untuk bulan ini
         }
 
         return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
@@ -140,9 +133,11 @@ class PembayaranController extends Controller
         if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
 
-            // Jangan tampilkan formulir jika pembayaran sudah ada dan berstatus 'sudah bayar'
-            if ($pembayaran && $pembayaran->status === 'sudah bayar') {
-                $pemakaianAir->editable = true;
+            // Tambahkan properti 'editable' untuk mengontrol apakah pembayaran bisa diubah
+            if ($pembayaran && $pembayaran->status !== 'Terverifikasi') {
+                $pemakaianAir->editable = true; // Jika status belum "Terverifikasi", warga boleh mengedit
+            } else {
+                $pemakaianAir->editable = false; // Jika sudah diverifikasi, edit tidak diperbolehkan
             }
         } else {
             $pemakaianAir = null; // Tidak ada tagihan untuk bulan ini
@@ -176,7 +171,7 @@ class PembayaranController extends Controller
 
         // Perbarui data pembayaran
         $pembayaran->update($validatedData);
-        dd($pembayaran);
+        // dd($pembayaran);
 
         return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diperbarui.');
     }

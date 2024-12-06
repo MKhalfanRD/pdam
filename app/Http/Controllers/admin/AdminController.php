@@ -21,6 +21,7 @@ class AdminController extends Controller
 
         // Sorting parameters
         $sort = $request->get('sort', 'status'); // Default sort by 'status'
+        // $sort = $request->get('sort', 'pemakaian_air.bulan'); // Default sort by 'bulan'
         $direction = $request->get('direction', 'asc'); // Default direction 'asc'
         $search = $request->get('search', '');
 
@@ -29,38 +30,51 @@ class AdminController extends Controller
         $bulan = $request->input('bulan', $tanggalHariIni->month); // Default bulan sekarang
         $tahun = $request->input('tahun', $tanggalHariIni->year); // Default tahun sekarang
 
-        // Ambil data berdasarkan bulan dan tahun yang dipilih
-        $query = Pemakaian_Air::with('pembayaran') // Eager load pembayaran
-            ->whereMonth('bulan', $bulan)
-            ->whereYear('bulan', $tahun);
-            // ->get();
+        $data = Pemakaian_Air::leftJoin('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
+            ->select(
+                'pemakaian_air.*',
+                'pembayaran.status as pembayaran_status',
+                'pembayaran.komentar'
+            )
+            ->whereMonth('pemakaian_air.bulan', $bulan)
+            ->whereYear('pemakaian_air.bulan', $tahun)
+            ->orderBy($sort, $direction)
+            ->get();
+
+
+        // // Ambil data berdasarkan bulan dan tahun yang dipilih
+        // $query = Pemakaian_Air::with('pembayaran') // Eager load pembayaran
+        //     ->whereMonth('bulan', $bulan)
+        //     ->whereYear('bulan', $tahun);
+        //     // ->get();
 
         // Sorting berdasarkan status atau kolom lainnya
-        if ($sort === 'status') {
-            $query = $query->join('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
-                ->orderByRaw("
-                    CASE
-                        WHEN pembayaran.status = 'pending' THEN 1
-                        WHEN pembayaran.status = 'terverifikasi' THEN 2
-                        ELSE 3
-                    END $direction
-                ")
-                ->select('pemakaian_air.*'); // Pastikan memilih kolom dari tabel utama
-        } else {
-            $query = $query->orderBy($sort, $direction);
-        }
+        // if ($sort === 'status') {
+        //     $query = $query->join('pembayaran', 'pemakaian_air.pemakaianAir_id', '=', 'pembayaran.pemakaianAir_id')
+        //         ->orderByRaw("
+        //             CASE
+        //                 WHEN pembayaran.status = 'pending' THEN 1
+        //                 WHEN pembayaran.status = 'terverifikasi' THEN 2
+        //                 ELSE 3
+        //             END $direction
+        //         ")
+        //         ->select('pemakaian_air.*'); // Pastikan memilih kolom dari tabel utama
+        // } else {
+        //     $query = $query->orderBy($sort, $direction);
+        // }
 
-        $data = $query->get();
+        // $data = $query->get();
 
         // $query = User::with('warga')->where('role', 'warga')->get();
         $data->map(function($item) {
             $carbonDate = Carbon::parse($item->bulan, $item->tahun);
             $item->bulan = $carbonDate->format('F'); // Nama bulan (contoh: November)
             $item->tahun = $carbonDate->format('Y'); // Tahun (contoh: 2024)
+            $item->status = $item->pembayaran_status ?? 'belum bayar'; //jika status null
             return $item;
         });
         // dd($data);
-        return view('admin.index', compact('role', 'data', 'sort', 'direction', 'search'));
+        return view('admin.index', compact('role', 'data', 'sort', 'direction', 'search', 'bulan', 'tahun'));
     }
 
     public function show($warga_id)

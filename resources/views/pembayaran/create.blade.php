@@ -25,6 +25,7 @@
 
             </div>
         @else
+        {{-- jika pembayaran belum ada --}}
             <form action="{{ route('pembayaran.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
@@ -66,7 +67,7 @@
                             <button type="button"
                                 class="bg-gray-400 px-5 py-2.5 text-white rounded-md hover:bg-gray-500 focus:outline-none">Kembali</button>
                         </a>
-                        <a href="{{ route('pembayaran.edit') }}">
+                        <a href="{{ route($pembayaran ? route('pembayaran.edit', $pembayaran) : 'warga.index') }}">
                             <button type="button"
                                 class="bg-gray-400 px-5 py-2.5 text-white rounded-md hover:bg-gray-500 focus:outline-none">Edit</button>
                         </a>

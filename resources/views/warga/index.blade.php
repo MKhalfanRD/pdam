@@ -10,52 +10,52 @@
 
                 <!-- Card 1 -->
                 <div class="bg-gray-700 shadow-lg rounded-lg p-6">
-                    <h3 class="text-xl font-bold mb-4">Jumlah Tagihan</h3>
+                    <h3 class="text-xl font-bold mb-4">Tagihan Bulan Ini</h3>
                     <p class="text-white">
-                        @if ($tagihanBulanIni)
-                            Rp. {{ number_format($tagihanBulanIni->tagihanAir, 2, ',', '.') }}
+                        @if ($pemakaianAir)
+                            Rp. {{ number_format($pemakaianAir->tagihanAir, 2, ',', '.') }}
                         @else
                             <span class="text-red-500">Tagihan bulan ini belum diinput oleh operator.</span>
                         @endif
                     </p>
+
                 </div>
 
                 <!-- Card 2 -->
                 <div class="bg-gray-700 shadow-lg rounded-lg p-6">
                     <h3 class="text-xl font-bold mb-4">Status Pembayaran</h3>
-                    @if ($tagihanBulanIni && $pembayaran)
-                        <p class="text-white">
-                            @if ($pembayaran->status === 'pending')
-                                Sudah Dibayar, menunggu acc admin
-                            @elseif($pembayaran->status === 'terverifikasi')
-                                Sudah Dibayar
-                            @endif
-                        </p>
-                    @else
-                        <p class="text-white">Belum Dibayar</p>
+                    @if ($statusPembayaran === 'Belum Bayar')
+                    <p class="text-2xl text-red-400">Belum Bayar</p>
+                    @elseif($statusPembayaran === 'Pending')
+                    <p class="text-xl text-yellow-400">Pending</p>
+                    @elseif($statusPembayaran === 'Terverifikasi')
+                    <p class="text-xl text-green-400">Terverifikasi</p>
                     @endif
                 </div>
             </div>
         </div>
 
         <div class="mb-6">
-            @if ($pembayaran)
-                <!-- Button to view payment details if already paid -->
-                <a href="{{ route('pembayaran.edit', $pembayaran) }}"
-                    class="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Lihat</a>
-            @else
-                <!-- Button to make a payment if not yet paid -->
+            @if ($statusPembayaran === 'Belum Bayar')
                 <a href="{{ route('pembayaran.create') }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Bayar Tagihan</a>
+            @elseif ($statusPembayaran === 'Terverifikasi')
+                <a href="{{ route('pembayaran.show', $pembayaran->pembayaran_id) }}"
+                    class="bg-yellow-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Lihat
+                    Pembayaran</a>
+            @elseif ($statusPembayaran === 'Pending')
+                <a href="{{ route('pembayaran.edit', $pembayaran->pembayaran_id) }}"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg mt-2 inline-block">Edit
+                    Pembayaran</a>
             @endif
         </div>
 
-        <!-- Tunggakan -->
+        {{-- <!-- Tunggakan -->
         @if ($tunggakan > 0)
             <div class="mb-6 bg-red-100 p-4 rounded">
                 <h3 class="text-xl font-medium text-red-700">Tunggakan</h3>
                 <p>Jumlah Tunggakan: Rp {{ number_format($tunggakan, 2, ',', '.') }}</p>
             </div>
-        @endif
+        @endif --}}
     </div>
 @endsection
