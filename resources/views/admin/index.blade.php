@@ -48,7 +48,7 @@
                     <th class="py-2 px-4">Awal</th>
                     <th class="py-2 px-4">Akhir</th>
                     <th class="py-2 px-4">Total Tagihan</th>
-                    <th class="py-2 px-4">Flag</th>
+                    {{-- <th class="py-2 px-4">Flag</th> --}}
                     <th class="py-2 px-4">Detail</th>
                     <th class="py-2 px-4">
                         <a href="{{ route('admin.index', ['sort' => 'status', 'direction' => $direction == 'asc' ? 'desc' : 'asc']) }}"
@@ -77,13 +77,13 @@
                         <td class="py-2 px-4">{{ $d->pemakaianLama }}</td>
                         <td class="py-2 px-4">{{ $d->pemakaianBaru }}</td>
                         <td class="py-2 px-4">Rp. {{ number_format($d->tagihanAir, 0, ',', '.') }}</td>
-                        <td class="py-2 px-4">
+                        {{-- <td class="py-2 px-4">
                             <div class="">
                                 <img src="{{ asset('icon/red_flag.png') }}" alt="toggle" class="flag-toggle w-5">
 
                             </div>
 
-                        </td>
+                        </td> --}}
                         <td class="py-2 px-4">
                             @if($d->validasi_status === 'valid')
                             <a href="{{ route('admin.edit', $d->validasi_id) }}">
