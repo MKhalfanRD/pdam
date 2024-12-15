@@ -12,6 +12,7 @@ class Validasi_Pembayaran extends Model
     protected $table = 'validasi_pembayaran';
 
     protected $primaryKey = 'validasi_id';
+    public $timestamps = false;
 
     protected $fillable = [
         'admin_id',

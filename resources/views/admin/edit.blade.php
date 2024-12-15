@@ -12,8 +12,7 @@
             @endif
 
             <!-- Form Validasi -->
-            @if ($pembayaran && $pembayaran->pembayaran_id)
-                <form action="{{ route('admin.validasi', $pembayaran->pembayaran_id) }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.update', $validasi->validasi_id) }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PATCH')
 
@@ -28,8 +27,8 @@
                     <div class="mb-4">
                         <label for="statusValidasi" class="block text-sm font-medium text-gray-700 mb-2">Status Validasi</label>
                         <select name="statusValidasi" id="statusValidasi" class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="valid" {{ old('statusValidasi') == 'valid' ? 'selected' : '' }} class="text-black bg-green-300">Valid</option>
-                            <option value="invalid" {{ old('statusValidasi') == 'invalid' ? 'selected' : '' }} class="text-black bg-red-400">Invalid</option>
+                            <option value="valid" {{ old('statusValidasi', $validasi->statusValidasi) == 'valid' ? 'selected' : '' }} class="text-black bg-green-300">Valid</option>
+                            <option value="invalid" {{ old('statusValidasi', $validasi->statusValidasi) == 'invalid' ? 'selected' : '' }} class="text-black bg-red-400">Invalid</option>
                         </select>
                         @error('statusValidasi')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
@@ -38,7 +37,7 @@
 
                     <div class="mb-4">
                         <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                        <textarea name="keterangan" id="keterangan" rows="4" class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('keterangan') }}</textarea>
+                        <textarea name="keterangan" id="keterangan" rows="4" class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('keterangan', $validasi->keterangan) }}</textarea>
                         @error('keterangan')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
@@ -53,15 +52,6 @@
                         </button>
                     </div>
                 </form>
-            @else
-                <!-- Jika pembayaran belum dilakukan -->
-                <div class="text-center">
-                    <p class="text-gray-600 italic mb-4">Warga ini belum melakukan pembayaran.</p>
-                    <a href="{{ route('admin.index') }}">
-                        <button type="button" class="bg-blue-500 px-5 py-2.5 text-white rounded-md hover:bg-blue-600 focus:outline-none">Kembali</button>
-                    </a>
-                </div>
-            @endif
         </div>
     </div>
 @endsection

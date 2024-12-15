@@ -3,6 +3,7 @@
 @section('content')
     <div class="container mx-auto max-w-7xl">
         <form method="GET" class="mb-4">
+            {{-- <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari..." class="border p-2 rounded"> --}}
             <label for="bulan" class="mr-2">Pilih Bulan:</label>
             <select name="bulan" id="bulan" class="border rounded p-1">
                 @for ($i = 1; $i <= 12; $i++)
@@ -19,6 +20,15 @@
                         {{ $i }}
                     </option>
                 @endfor
+            </select>
+
+            <label for="status" class="ml-4 mr-2">Status:</label>
+            <select name="status" id="status" class="border rounded p-1">
+                <option value="" {{ request('status') == '' ? 'selected' : '' }}>Semua</option>
+                <option value="Belum Bayar" {{ request('status') == 'Belum Bayar' ? 'selected' : '' }}>Belum Bayar</option>
+                <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+                <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi
+                </option>
             </select>
 
             <button type="submit" class="ml-4 px-4 py-2 bg-blue-500 text-white rounded">Filter</button>
@@ -66,7 +76,7 @@
                         <td class="py-2 px-4">{{ $d->tahun }}</td>
                         <td class="py-2 px-4">{{ $d->pemakaianLama }}</td>
                         <td class="py-2 px-4">{{ $d->pemakaianBaru }}</td>
-                        <td class="py-2 px-4">{{ $d->tagihanAir }}</td>
+                        <td class="py-2 px-4">Rp. {{ number_format($d->tagihanAir, 0, ',', '.') }}</td>
                         <td class="py-2 px-4">
                             <div class="">
                                 <img src="{{ asset('icon/red_flag.png') }}" alt="toggle" class="flag-toggle w-5">
@@ -75,9 +85,19 @@
 
                         </td>
                         <td class="py-2 px-4">
+                            @if($d->validasi_status === 'valid')
+                            <a href="{{ route('admin.edit', $d->validasi_id) }}">
+                                <img src="{{ asset('icon/detail.png') }}" alt="detail" class="flag-toggle w-5">
+                            </a>
+                            @elseif($d->validasi_status === 'invalid')
+                            <a href="{{ route('admin.edit', $d->validasi_id) }}">
+                                <img src="{{ asset('icon/detail.png') }}" alt="detail" class="flag-toggle w-5">
+                            </a>
+                            @else
                             <a href="{{ route('admin.show', $d->warga_id) }}">
                                 <img src="{{ asset('icon/detail.png') }}" alt="detail" class="flag-toggle w-5">
                             </a>
+                            @endif
                         </td>
                         <td class="py-2 px-4">
                             @if ($d->pembayaran->count() > 0)
@@ -85,13 +105,13 @@
                                 <span
                                     class="
                                             @if ($status === 'Belum Bayar') text-red-500
-                                            @elseif($status === 'pending') text-yellow-500
+                                            @elseif($status === 'Pending') text-yellow-500
                                             @elseif($status === 'Terverifikasi') text-green-500 @endif
                                         ">
                                     {{ $status }}
                                 </span>
                             @else
-                                <span class="text-red-500">belum bayar</span>
+                                <span class="text-red-500">Belum Bayar</span>
                             @endif
                         </td>
                     </tr>

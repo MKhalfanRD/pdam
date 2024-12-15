@@ -21,6 +21,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('admin.index');
         Route::get('/{id}/show', [AdminController::class, 'show'])->name('admin.show');
         Route::get('/summary', [AdminController::class, 'summary'])->name('admin.summary');
+        Route::patch('/validasi/{pembayaran_id}', [AdminController::class, 'validasi'])->name('admin.validasi');
+        Route::get( '/{validasi_id}/edit', [AdminController::class, 'edit'])->name('admin.edit');
+        Route::patch('/{validasi_id}/edit', [AdminController::class, 'update'])->name('admin.update');
     });
     //operator
     Route::prefix('operator')->group(function () {

@@ -34,5 +34,10 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(Pemakaian_Air::class, 'pemakaianAir_id', 'pemakaianAir_id');
     }
-    
+
+    public function validasi()
+    {
+        return $this->hasOne(Validasi_Pembayaran::class, 'pembayaran_id');
+    }
+
 }

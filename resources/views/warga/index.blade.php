@@ -2,6 +2,11 @@
 
 @section('content')
     <div class="container mx-auto">
+        @if (session('success'))
+                <div class="bg-green-500 text-white p-4 rounded-md mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
         <h2 class="text-2xl font-semibold mb-4">Hallo {{ $warga->nama ?? 'N/A' }}</h2>
 
         <!-- Ringkasan Tagihan Bulan Ini -->
@@ -13,7 +18,7 @@
                     <h3 class="text-xl font-bold mb-4">Tagihan Bulan Ini</h3>
                     <p class="text-white">
                         @if ($pemakaianAir)
-                            Rp. {{ number_format($pemakaianAir->tagihanAir, 2, ',', '.') }}
+                            Rp. {{ number_format($pemakaianAir->tagihanAir, 0, ',', '.') }}
                         @else
                             <span class="text-red-500">Tagihan bulan ini belum diinput oleh operator.</span>
                         @endif
@@ -40,8 +45,8 @@
                 <a href="{{ route('pembayaran.create') }}"
                     class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Bayar Tagihan</a>
             @elseif ($statusPembayaran === 'Terverifikasi')
-                <a href="{{ route('pembayaran.show', $pembayaran->pembayaran_id) }}"
-                    class="bg-yellow-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Lihat
+                <a href="{{ route('pembayaran.edit', $pembayaran->pembayaran_id) }}"
+                    class="bg-green-500 text-white px-4 py-2 rounded-lg mt-2 inline-block">Lihat
                     Pembayaran</a>
             @elseif ($statusPembayaran === 'Pending')
                 <a href="{{ route('pembayaran.edit', $pembayaran->pembayaran_id) }}"

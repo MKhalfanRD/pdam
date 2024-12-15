@@ -4,6 +4,7 @@ namespace App\Http\Controllers\operator;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pemakaian_Air;
+use App\Models\Pembayaran;
 use App\Models\User;
 use App\Models\Warga;
 use Carbon\Carbon;
@@ -130,7 +131,10 @@ class OperatorController extends Controller
 
     public function update(Request $request, $warga_id)
     {
-        $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)->first();
+        $pemakaianAir = Pemakaian_Air::where('warga_id', $warga_id)
+        ->whereMonth('bulan', now()->month) // Hanya cari berdasarkan bulan
+        ->whereYear('bulan', now()->year)  // Hanya cari berdasarkan tahun
+        ->first();
 
         $request->validate([
             'pemakaianBaru' => 'required|numeric',
@@ -158,26 +162,19 @@ class OperatorController extends Controller
 
         $operator_id = Auth::user()->id;
 
-        $currentMonthYear = now()->format('Y-m-d');
+        // $currentMonthYear = now()->format('Y-m-d');
+        $bulanSaatIni = now()->month;
+        $tahunSaatIni = now()->year;
 
-        // Update data di pemakaian_air
-        // $d = Pemakaian_Air::updateOrCreate(
-        //     ['warga_id' => $warga_id], // Jika sudah ada warga_id, perbarui
-        //     [
-        //         'operator_id' => $operator_id,
-        //         'bulan' => $currentMonthYear, // Format YYYY-MM-DD
-        //         'pemakaianLama' => $request->input('pemakaianLama'),
-        //         'pemakaianBaru' => $request->input('pemakaianBaru'),
-        //         'kubikasi' => $kubikasi,
-        //         'tagihanAir' => $tagihanAir,
-        //         'foto' => $fotoPath,
-        //     ]
-        // );
+        // Format bulan dan tahun dalam format 'Y-m' (tanpa mengubah tanggal)
+        $currentMonthYear = now()->format('Y-m') . '-01';
+
         // Perbarui data atau buat baru jika belum ada
-        Pemakaian_Air::updateOrCreate(
+        $pemakaianAir = Pemakaian_Air::updateOrCreate(
             [
                 'warga_id' => $warga_id,
-                'bulan' => $currentMonthYear, // Pastikan hanya berlaku untuk bulan ini
+                'bulan' => $currentMonthYear // Format hanya tahun dan bulan
+                // 'tahun' => $tahunSaatIni, // Pastikan hanya berlaku untuk tahun ini
             ],
             [
                 'operator_id' => Auth::id(),
@@ -186,6 +183,21 @@ class OperatorController extends Controller
                 'kubikasi' => $kubikasi,
                 'tagihanAir' => $tagihanAir,
                 'foto' => $fotoPath,
+            ]
+        );
+
+        // // Ensure that the Pembayaran record exists for this resident, month, and year
+        Pembayaran::firstOrCreate(
+            [
+                'warga_id' => $warga_id,
+                'waktuBayar' => $currentMonthYear,
+            ],
+            [
+                'status' => 'Belum Bayar', // Default status if not yet paid
+                'pemakaianAir_id' => $pemakaianAir->pemakaianAir_id, // Link it to the Pemakaian_Air record
+                'buktiBayar' => '', // Default sementara untuk kolom buktiBayar
+                'tunggakan' => 0.00, // Nilai default untuk tunggakan
+                'komentar' => null, // Nilai default jika tidak ada komentar
             ]
         );
         // dd($d);

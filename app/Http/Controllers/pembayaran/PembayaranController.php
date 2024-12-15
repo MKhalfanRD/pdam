@@ -76,14 +76,31 @@ class PembayaranController extends Controller
         // Debug untuk melihat apakah tagihan dan pembayaran sudah ada
         // dd($pemakaianAir, optional($pemakaianAir)->tagihanAir);
 
-        $pembayaran = null;
 
+        // Jika data pemakaian air belum ada
+        if (is_null($pemakaianAir)) {
+            return view('pembayaran.create', [
+                'message' => 'Tagihan belum tersedia. Silakan cek kembali nanti.',
+                'role' => $role, // Pass role to the view
+            ]);
+        }
+
+        $pembayaran = null;
         // Jika ada tagihan, periksa status pembayaran
-        if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
+        if (!is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
         }
 
-        return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran'));
+        // Tampilkan pesan jika belum ada bukti bayar
+        if (!$pembayaran || is_null($pembayaran->buktiBayar)) {
+            return view('pembayaran.create', [
+                'pemakaianAir' => $pemakaianAir,
+                'message' => 'Anda belum mengunggah bukti pembayaran. Silakan unggah bukti bayar.',
+                'pembayaran' => $pembayaran, // pastikan pembayaran tetap ada
+                'role' => $role, // Pass role to the view
+            ]);
+        }
+        return view('pembayaran.create', compact('role', 'pemakaianAir', 'pembayaran' ));
     }
 
 
@@ -97,20 +114,29 @@ class PembayaranController extends Controller
             'komentar' => 'nullable|string',
         ]);
 
+        // Format bulan dan tahun dalam format 'Y-m' (tanpa mengubah tanggal)
+        $currentMonthYear = now()->format('Y-m') . '-01';
+
         // Upload bukti pembayaran
         $buktiBayarPath = $request->file('buktiBayar')->store('bukti_pembayaran', 'public');
 
-        $p = Pembayaran::create([
-            'warga_id' => Auth::user()->warga->warga_id,
-            'pemakaianAir_id' => $request->pemakaianAir_id,
-            'buktiBayar' => $buktiBayarPath,
-            'waktuBayar' => now(),
-            // 'tunggakan' => $request->input('tunggakan', 0), // Sesuaikan nilai tunggakan
-            'komentar' => $request->komentar,
-        ]);
+        $p = Pembayaran::updateOrCreate(
+            [
+                'warga_id' => Auth::user()->warga->warga_id,
+                'pemakaianAir_id' => $request->pemakaianAir_id,
+            ],
+            [
+                'buktiBayar' => $buktiBayarPath,
+                'waktuBayar' => $currentMonthYear,
+                // 'tunggakan' => $request->input('tunggakan', 0), // Sesuaikan nilai tunggakan
+                'status' => 'pending', // Set status menjadi pending
+                'komentar' => $request->komentar,
+            ]
+
+        );
         // dd($p);
 
-        return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diupload.');
+        return redirect()->route('warga.index')->with('success', 'Pembayaran berhasil diupload.');
     }
 
     public function edit(Pembayaran $pembayaran)
@@ -133,11 +159,15 @@ class PembayaranController extends Controller
         if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
 
+            // Mengambil data validasi pembayaran terkait
+            $validasi = $pembayaran ? $pembayaran->validasi : null;
+
             // Tambahkan properti 'editable' untuk mengontrol apakah pembayaran bisa diubah
             if ($pembayaran && $pembayaran->status !== 'Terverifikasi') {
                 $pemakaianAir->editable = true; // Jika status belum "Terverifikasi", warga boleh mengedit
             } else {
                 $pemakaianAir->editable = false; // Jika sudah diverifikasi, edit tidak diperbolehkan
+                $validasi = $pembayaran->validasi ?? null;
             }
         } else {
             $pemakaianAir = null; // Tidak ada tagihan untuk bulan ini
@@ -145,7 +175,7 @@ class PembayaranController extends Controller
 
         // dd($pemakaianAir);
 
-        return view('pembayaran.edit', compact('pembayaran', 'role', 'pemakaianAir'));
+        return view('pembayaran.edit', compact('pembayaran', 'role', 'pemakaianAir', 'validasi'));
     }
 
     public function update(Request $request, Pembayaran $pembayaran)
@@ -153,7 +183,7 @@ class PembayaranController extends Controller
         // dd($request->all());
 
         $validatedData = $request->validate([
-            'buktiBayar' => 'nullable|image', // Membolehkan 'nullable' jika tidak ada perubahan gambar
+            'buktiBayar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Membolehkan 'nullable' jika tidak ada perubahan gambar
             'komentar' => 'nullable|string|max:255',
         ]);
 
@@ -173,9 +203,6 @@ class PembayaranController extends Controller
         $pembayaran->update($validatedData);
         // dd($pembayaran);
 
-        return redirect()->route('warga.index')->with('success', 'Bukti pembayaran berhasil diperbarui.');
+        return redirect()->route('warga.index')->with('success', 'Pembayaran berhasil diperbarui.');
     }
-
-
-
 }
