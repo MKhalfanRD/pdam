@@ -159,7 +159,7 @@ class PembayaranController extends Controller
         if ($pemakaianAir && !is_null($pemakaianAir->tagihanAir)) {
             $pembayaran = Pembayaran::where('pemakaianAir_id', $pemakaianAir->pemakaianAir_id)->first();
 
-            // Mengambil data validasi pembayaran terkait
+            // Pastikan pembayaran ada sebelum mengambil validasi
             $validasi = $pembayaran ? $pembayaran->validasi : null;
 
             // Tambahkan properti 'editable' untuk mengontrol apakah pembayaran bisa diubah

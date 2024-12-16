@@ -37,7 +37,7 @@ class Pembayaran extends Model
 
     public function validasi()
     {
-        return $this->hasOne(Validasi_Pembayaran::class, 'pembayaran_id');
+        return $this->hasOne(Validasi_Pembayaran::class, 'pembayaran_id', 'pembayaran_id');
     }
 
 }
