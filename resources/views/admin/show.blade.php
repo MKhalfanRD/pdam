@@ -17,19 +17,88 @@
                     @csrf
                     @method('PATCH')
 
+                    <h2 class="bg-blue-400 text-black rounded p-4">Operator</h2>
+                    <div class="mb-6">
+                        <p class="text-sm font-medium text-gray-700 mb-2">Foto Meteran</p>
+                        @if ($pemakaianAir->foto === '')
+                        <h2 class="bg-yellow-200 rounded p-4">Operator belum upload bukti bayar</h2>
+                        @else
+                        <img src="{{ asset('storage/' . $pemakaianAir->foto) }}" alt="fotoMeteran"
+                            class="w-full md:w-1/2 h-auto rounded-lg shadow mb-4 mx-auto">
+                        @endif
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <div class="alamat mb-4">
+                                <label for="alamat" class="block text-sm font-medium text-gray-700 mb-2">alamat</label>
+                                <input type="text" name="warga" id="warga"
+                                    value="{{ $pemakaianAir->warga->alamat }}"
+                                    class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0"
+                                    disabled placeholder="ex: 1650">
+                            </div>
+                            <div class="nama">
+                                <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama</label>
+                                <input type="text" name="warga" id="warga" value="{{ $pemakaianAir->warga->nama }}"
+                                    class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0"
+                                    disabled placeholder="ex: 1650">
+                            </div>
+                        </div>
+                        <div class="col-span-1">
+                            <div class="flex flex-row gap-4 mb-4">
+                                <div class="pemakaianLama">
+                                    <label for="pemakaianLama"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Pemakaian
+                                        Lama</label>
+                                    <input type="number" name="pemakaianLama" id="pemakaianLama"
+                                        value="{{ $pemakaianAir->pemakaianLama }}"
+                                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0"
+                                        disabled placeholder="ex: 1650">
+                                </div>
+                                <div class="pemakaianBaru">
+                                    <label for="pemakaianBaru"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Pemakaian
+                                        Baru</label>
+                                    <input type="number" name="pemakaianBaru" id="pemakaianBaru"
+                                        value="{{ $pemakaianAir->pemakaianBaru }}"
+                                        class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0"
+                                        disabled placeholder="ex: 1650">
+                                </div>
+                            </div>
+
+                            <div class="tagihanAir">
+                                <label for="tagihanAir" class="block text-sm font-medium text-gray-700 mb-2">Pemakaian
+                                    Baru</label>
+                                <input type="text" name="tagihanAir" id="tagihanAir"
+                                    value="Rp. {{ number_format($pemakaianAir->tagihanAir, 0, ',', '.') }}"
+                                    class="block w-full rounded-md bg-gray-200 text-gray-900 px-3.5 py-2 mt-2 border-0"
+                                    disabled placeholder="ex: 1650">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="bg-yellow-400 text-black rounded p-4">Warga</h2>
                     <div class="mb-6">
                         <p class="text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran</p>
+                        @if ($pembayaran->buktiBayar === '')
+                        <h2 class="bg-yellow-200 rounded p-4">Warga belum upload bukti bayar</h2>
+                        @else
                         <img src="{{ asset('storage/' . $pembayaran->buktiBayar) }}" alt="Bukti Pembayaran"
                             class="w-full md:w-1/2 h-auto rounded-lg shadow mb-4 mx-auto">
+                        @endif
                         <p class="text-sm font-medium text-gray-700">Komentar:</p>
                         <p class="text-gray-600 italic">{{ $pembayaran->komentar }}</p>
                     </div>
 
                     <div class="mb-4">
-                        <label for="statusValidasi" class="block text-sm font-medium text-gray-700 mb-2">Status Validasi</label>
-                        <select name="statusValidasi" id="statusValidasi" class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="valid" {{ old('statusValidasi') == 'valid' ? 'selected' : '' }} class="text-black bg-green-300">Valid</option>
-                            <option value="invalid" {{ old('statusValidasi') == 'invalid' ? 'selected' : '' }} class="text-black bg-red-400">Invalid</option>
+                        <label for="statusValidasi" class="block text-sm font-medium text-gray-700 mb-2">Status
+                            Validasi</label>
+                        <select name="statusValidasi" id="statusValidasi"
+                            class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="valid" {{ old('statusValidasi') == 'valid' ? 'selected' : '' }}
+                                class="text-black bg-green-300">Valid</option>
+                            <option value="invalid" {{ old('statusValidasi') == 'invalid' ? 'selected' : '' }}
+                                class="text-black bg-red-400">Invalid</option>
                         </select>
                         @error('statusValidasi')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
@@ -38,7 +107,8 @@
 
                     <div class="mb-4">
                         <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                        <textarea name="keterangan" id="keterangan" rows="4" class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('keterangan') }}</textarea>
+                        <textarea name="keterangan" id="keterangan" rows="4"
+                            class="w-full px-4 py-2 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">{{ old('keterangan') }}</textarea>
                         @error('keterangan')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
@@ -46,9 +116,11 @@
 
                     <div class="flex justify-between items-center">
                         <a href="{{ route('admin.index') }}">
-                            <button type="button" class="bg-gray-400 px-5 py-2.5 text-white rounded-md hover:bg-gray-500 focus:outline-none">Kembali</button>
+                            <button type="button"
+                                class="bg-gray-400 px-5 py-2.5 text-white rounded-md hover:bg-gray-500 focus:outline-none">Kembali</button>
                         </a>
-                        <button type="submit" class="bg-green-500 px-5 py-2.5 text-white rounded-md hover:bg-green-600 focus:outline-none">
+                        <button type="submit"
+                            class="bg-green-500 px-5 py-2.5 text-white rounded-md hover:bg-green-600 focus:outline-none">
                             Simpan
                         </button>
                     </div>
@@ -58,7 +130,8 @@
                 <div class="text-center">
                     <p class="text-gray-600 italic mb-4">Warga ini belum melakukan pembayaran.</p>
                     <a href="{{ route('admin.index') }}">
-                        <button type="button" class="bg-blue-500 px-5 py-2.5 text-white rounded-md hover:bg-blue-600 focus:outline-none">Kembali</button>
+                        <button type="button"
+                            class="bg-blue-500 px-5 py-2.5 text-white rounded-md hover:bg-blue-600 focus:outline-none">Kembali</button>
                     </a>
                 </div>
             @endif

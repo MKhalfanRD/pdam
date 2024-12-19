@@ -29,10 +29,13 @@
                                         {{ \Carbon\Carbon::parse($pembayaran->waktuBayar)->format('F Y') }}
                                     </td>
                                     <td class="">
-                                        <span
-                                            class="{{ $pembayaran->status === 'sudah bayar' ? 'text-green-500' : 'text-red-500' }}">
-                                            {{ ucfirst($pembayaran->status) }}
-                                        </span>
+                                        @if ($pembayaran->status === 'Terverifikasi')
+                                        <span class="text-green-500">{{$pembayaran->status}}</span>
+                                        @elseif ($pembayaran->status === 'Pending')
+                                        <span class="text-yellow-500">{{$pembayaran->status}}</span>
+                                        @elseif ($pembayaran->status === 'Belum Bayar')
+                                        <span class="text-red-500">{{$pembayaran->status}}</span>
+                                        @endif
                                     </td>
                                     <td class="">
                                         <a href="{{ route('warga.detailHistory', $pembayaran->id) }}"
